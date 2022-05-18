@@ -1,16 +1,19 @@
 const express = require('express');
 const path = require('path');
 const db = require('./config/connection');
-const routes = require('./routes');
+// const routes = require('./routes'); removing as not using with graphQL
 // Import the ApolloServer class
 const { ApolloServer } = require('apollo-server-express');
 // Import the two parts of a GraphQL schema
 const { typeDefs, resolvers } = require('./schemas');
+const { authMiddleware } = require('./utils/auth');
 
 // create a new apollo server
+// include middleware to handle tokens within the body of requests
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  context: authMiddleware
 });
 
 // connect the apollo server with GraphQL schema and start prior to starting app. 
@@ -31,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
 }
 
-app.use(routes);
+// app.use(routes); removing as not using with graphQL
 
 // connect to the DB and then start the app server
 db.once('open', () => {
